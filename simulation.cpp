@@ -11,20 +11,80 @@ class TaylorLine
 {
 public:
     std::vector<Bead> beads;
-    double freq, phi;
 
-    // PARTNER B: Compute internal wiggles and spring
+    // swimmer parameters
+    double freq;  // beating frequency ν
+    double phi;   // phase
+    double b;     // wave amplitude
+    double kappa; // bending rigidity
+    double k_s;   // spring constant
+    double l0;    // rest length
+    double gamma; // drag coefficient
+
+    // -------------------------------
+    // PARTNER B: Internal forces
+    // -------------------------------
     void computeInternalForces(double t)
     {
-        // 1. Calculate Hooke's Law between neighbors
-        // 2. Calculate Bending force based on sin(2*PI*freq*t + phi)
+        int N = beads.size();
+
+        // Reset forces
+        for (auto &bead : beads)
+        {
+            bead.fx = 0.0;
+            bead.fy = 0.0;
+        }
+
+        // 1. Hooke's law (springs)
+        for (int i = 0; i < N - 1; i++)
+        {
+            double dx = beads[i + 1].x - beads[i].x;
+            double dy = beads[i + 1].y - beads[i].y;
+            double r = sqrt(dx * dx + dy * dy) + 1e-12;
+
+            double F = k_s * (r - l0);
+
+            double fx = F * dx / r;
+            double fy = F * dy / r;
+
+            // Newton's 3rd law
+            beads[i].fx += fx;
+            beads[i].fy += fy;
+            beads[i + 1].fx -= fx;
+            beads[i + 1].fy -= fy;
+        }
+
+        // 2. Active bending (Taylor wave – Eq. 1)
+        for (int i = 1; i < N - 1; i++)
+        {
+
+            double c = b * sin(
+                               2.0 * M_PI * (freq * t + 2.0 * i / N) + phi);
+
+            // discrete curvature
+            double cx = beads[i + 1].x - 2.0 * beads[i].x + beads[i - 1].x;
+            double cy = beads[i + 1].y - 2.0 * beads[i].y + beads[i - 1].y;
+
+            beads[i].fx += kappa * c * cx;
+            beads[i].fy += kappa * c * cy;
+        }
     }
 
-    // PARTNER B: Move beads based on final forces
+    // -------------------------------
+    // PARTNER B: Overdamped dynamics
+    // -------------------------------
     void updatePhysics(double dt)
     {
-        // Update velocity: v = v + (F/M)*dt
-        // Update position: x = x + v*dt
+        for (auto &bead : beads)
+        {
+
+            // pure overdamped motion (low Reynolds number)
+            bead.vx = bead.fx / gamma;
+            bead.vy = bead.fy / gamma;
+
+            bead.x += bead.vx * dt;
+            bead.y += bead.vy * dt;
+        }
     }
 };
 

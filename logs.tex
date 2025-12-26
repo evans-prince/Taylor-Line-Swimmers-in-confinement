@@ -40,7 +40,29 @@
 
 \subsection*{Partner B: Taylor Line Internal Physics}
 \begin{itemize}[noitemsep]
-    \item \textit{( Priyanshu will write his log here )}
+    \item \textbf{Swimmer Representation:} Each swimmer is modeled as a discretized Taylor line composed of beads connected in sequence, capturing undulatory microswimmer motion at low Reynolds number.
+    \item \textbf{Elastic Spring Forces:} Neighboring beads interact via Hookean springs
+    \[
+    \mathbf{F}_s = k_s(r - l_0)\hat{\mathbf{r}}
+    \]
+    ensuring inextensibility and structural integrity of the swimmer.
+    \item \textbf{Active Bending Mechanism:} A traveling sinusoidal curvature wave is imposed along the body to generate propulsion, given by
+    \[
+    c(i, t) = b \sin\left[2\pi\left(\nu t + \frac{2i}{N}\right) + \phi\right]
+    \]
+    \item \textbf{Bending Force Formulation:} Discrete curvature
+    \[
+    \mathbf{C}_i = \mathbf{r}_{i+1} - 2\mathbf{r}_i + \mathbf{r}_{i-1}
+    \]
+    produces bending forces
+    \[
+    \mathbf{F}_b = \kappa \, c(i, t) \, \mathbf{C}_i
+    \]
+    \item \textbf{Overdamped Dynamics:} Bead motion follows viscous-dominated dynamics
+    \[
+    \gamma \mathbf{v}_i = \mathbf{F}_i, \quad \mathbf{r}_i(t + \Delta t) = \mathbf{r}_i(t) + \mathbf{v}_i \Delta t
+    \]
+    \item \textbf{Outcome:} The implemented internal physics yields smooth, force-free, self-propelled Taylor-line swimmers consistent with theoretical and experimental microswimmer models.
 \end{itemize}
 
 \end{document}
