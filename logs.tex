@@ -1,0 +1,60 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\title{BTP Progress Log: Microswimmer Bimotility Simulation}
+\author{Partner A \& Partner B}
+\date{December 2026}
+
+\begin{document}
+
+\maketitle
+
+\section*{Project Overview}
+This project simulates a bimotility mixture of model microswimmers (Taylor lines) in a circular rigid confinement to study self-organization, clustering, and segregation dynamics[cite: 3, 10].
+
+---
+
+\section*{Week 1: Literature Review \& Work Distribution}
+\textbf{Interval:} December 15, 2026 -- December 21, 2026
+
+\begin{itemize}
+    \item \textbf{Research Paper Analysis:} Studied "Self-organization in a bimotility mixture of model microswimmers" by Agrawal and Babu[cite: 3, 4]. 
+    \item \textbf{Key Concepts Identified:} 
+        \begin{itemize}
+            \item The \textbf{Taylor Line} model: A discretized 2D chain of beads using a sinusoidal bending wave for propulsion[cite: 20, 36].
+            \item \textbf{Bimotility Mixtures:} Systems containing two types of swimmers differing only in propulsion speed (beating frequency $\nu$)[cite: 8, 86].
+            \item \textbf{Interaction Physics:} The importance of hydrodynamic, steric (Lennard-Jones), and boundary interactions in clustering[cite: 35, 148].
+        \end{itemize}
+    \item \textbf{Work Distribution:} 
+        \begin{itemize}
+            \item \textbf{Partner A (Environment \& Interaction):} Responsible for the circular boundary logic, collision handling, and swimmer-swimmer steric interactions.
+            \item \textbf{Partner B (Swimmer Architect):} Responsible for the internal physics of the Taylor line (Spring forces, Bending waves, and Integration).
+        \end{itemize}
+\end{itemize}
+
+---
+
+\section*{Week 2: Implementation of Dry Simulation (No Fluid)}
+\textbf{Interval:} December 22, 2026 -- December 28, 2026
+
+\subsection*{Partner A: Boundary \& Steric Interaction}
+\begin{itemize}
+    \item \textbf{Circular Rigid Boundary:} Implemented the global constraint $x^2 + y^2 \leq R^2$[cite: 49]. Developed the reflection logic to flip velocity vectors along the normal direction when a bead contacts the wall[cite: 50, 68].
+    \item \textbf{Steric Interaction Force:} Programmed the truncated Lennard-Jones potential $V_l$ for inter-swimmer bead interactions[cite: 62].
+    \item \textbf{Force Derivation:} Derived the force formula $F = \frac{48\epsilon}{r} [ (\frac{r_o}{r})^{12} - 0.5(\frac{r_o}{r})^{6} ]$ from the potential energy gradient[cite: 63, 66].
+    \item \textbf{Cutoff Logic:} Applied the truncation at $r < 2^{1/6}r_o$ to ensure computational efficiency and physical accuracy[cite: 64].
+\end{itemize}
+
+\subsection*{Partner B: Taylor Line Internal Physics}
+\begin{itemize}
+    \item \textbf{Chain Skeleton:} Defined a structure for $P=100$ beads connected in a series[cite: 51, 71].
+    \item \textbf{Hooke's Spring Potential ($F_1$):} Implemented the spring force with equilibrium distance $l=0.5$ and constant $D=10^6$ to maintain chain integrity[cite: 54].
+    \item \textbf{Sinusoidal Bending Engine ($F_2$):} Developed the curvature function $c(i,t) = b \sin(2\pi \nu t + \phi)$ to drive the propulsion wave[cite: 56, 58].
+    \item \textbf{Numerical Integration:} Set up the Euler integration loop to update velocities and positions based on total force accumulation[cite: 67].
+\end{itemize}
+
+\end{document}
