@@ -2,115 +2,134 @@
 #include <vector>
 #include <cmath>
 
-struct Bead {
+struct Bead
+{
     double x, y, vx, vy, fx, fy;
 };
 
-class TaylorLine {
+class TaylorLine
+{
 public:
     std::vector<Bead> beads;
     double freq, phi;
 
-    // PARTNER B: Compute internal wiggles and springs
-    void computeInternalForces(double t) {
+    // PARTNER B: Compute internal wiggles and spring
+    void computeInternalForces(double t)
+    {
         // 1. Calculate Hooke's Law between neighbors
         // 2. Calculate Bending force based on sin(2*PI*freq*t + phi)
     }
 
     // PARTNER B: Move beads based on final forces
-    void updatePhysics(double dt) {
+    void updatePhysics(double dt)
+    {
         // Update velocity: v = v + (F/M)*dt
         // Update position: x = x + v*dt
     }
 };
 
-class Simulation {
+class Simulation
+{
 public:
     std::vector<TaylorLine> swarm;
     double R; // Radius to be decreased
 
     // PARTNER A: Prevent swimmers from overlapping
-    void applyStericForces() {
+    void applyStericForces()
+    {
         // Truncated Lennard-Jones potential for every beads on different swimmers
 
-		double r0 = 1.0;							//r0=a0 as per reaserch paper
-		double epsilon = 13.75;						// strenth of potential
-		double cutoff = pow(2,1/6)*r0;				// potential applied only when r<cutoff
-		double cutoff_sq = cutoff*cutoff;			// we will measure r_sq < cutoff_sq
+        double r0 = 1.0;                    // r0=a0 as per reaserch paper
+        double epsilon = 13.75;             // strenth of potential
+        double cutoff = pow(2, 1 / 6) * r0; // potential applied only when r<cutoff
+        double cutoff_sq = cutoff * cutoff; // we will measure r_sq < cutoff_sq
 
+        for (int i = 0; i < swarm.size(); i++)
+        {
+            for (int j = i + 1; j < swarm.size(); j++)
+            {
 
-		for(int i=0;i<swarm.size();i++){
-				for(int j= i+1;j<swarm.size(); j++){
+                for (auto &beadI : swarm[i].beads)
+                {
+                    for (auto &beadJ : swarm[j].beads)
+                    {
 
-						for(auto &beadI : swarm[i].beads ){
-							for(auto &beadJ : swarm[j].beads ){
+                        double dx = beadI.x - beadJ.x;
+                        double dy = beadI.y - beadJ.y;
+                        double r_sq = dx * dx + dy * dy;
+                        double r = sqrt(r_sq);
 
-								double dx = beadI.x - beadJ.x;
-								double dy = beadI.y - beadJ.y;
-								double r_sq = dx*dx + dy*dy;
-								double r = sqrt(r_sq);
+                        if (r_sq < cutoff_sq)
+                        {
 
-								if( r_sq < cutoff_sq ) {
+                            // we need to change the force value on every bead
+                            // we know F = -grad.V
 
-										// we need to change the force value on every bead
-										// we know F = -grad.V
+                            double e_r = 13.75 / r;
+                            double r0_r6 = 1 / pow(r_sq, 3); // r0 is taken 1
+                            double r0_r12 = r0_r6 * r0_r6;
+                            double f_mag = (48 * e_r) * (r0_r12 - 0.5 * r0_r6);
 
-										double e_r = 13.75/r;
-										double r0_r6 = 1/pow(r_sq,3); // r0 is taken 1
-										double r0_r12 = r0_r6 * r0_r6;
-										double f_mag = ( 48 * e_r) * ( r0_r12 - 0.5*r0_r6 );
+                            // decomposing forces
+                            double fdx = f_mag * (dx / r);
+                            double fdy = f_mag * (dy / r);
 
-										// decomposing forces
-										double fdx = f_mag * ( dx/r);
-										double fdy = f_mag * ( dy/r);
-
-										beadI.fx +=fx;
-										beadI.fy +=fy;
-										beadJ.fx -=fx;
-										beadJ.fy -=fy;
-								}
-							}
-						}
-				}
-		}
+                            beadI.fx += fx;
+                            beadI.fy += fy;
+                            beadJ.fx -= fx;
+                            beadJ.fy -= fy;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // PARTNER A: Keep everything inside the circular wall
-    void handleCircularBoundary() {
+    void handleCircularBoundary()
+    {
         // for each bead , if r > R reflect it
-	 	for(auto &tl : swarm){
-        	for(auto &b : tl.beads){
-            	double r = sqrt(b.x*b.x + b.y*b.y);
+        for (auto &tl : swarm)
+        {
+            for (auto &b : tl.beads)
+            {
+                double r = sqrt(b.x * b.x + b.y * b.y);
 
-            if (r > current_R) {
-                //  unit normal vector (points outward)
-                double nx = b.x/r;
-                double ny = b.y/r;
+                if (r > current_R)
+                {
+                    //  unit normal vector (points outward)
+                    double nx = b.x / r;
+                    double ny = b.y / r;
 
-                // v dot n
-                double v_dot_n = b.vx * nx + b.vy * ny;
+                    // v dot n
+                    double v_dot_n = b.vx * nx + b.vy * ny;
 
-                if (v_dot_n > 0) {
+                    if (v_dot_n > 0)
+                    {
 
-                    b.vx-= 2.0*v_dot_n * nx;
-                    b.vy-= 2.0* v_dot_n * ny;
+                        b.vx -= 2.0 * v_dot_n * nx;
+                        b.vy -= 2.0 * v_dot_n * ny;
+                    }
+
+                    // pushing the beads just inside the confinement
+                    b.x = (current_R - 0.01) * nx;
+                    b.y = (current_R - 0.01) * ny;
                 }
-
-                // pushing the beads just inside the confinement
-                b.x=(current_R - 0.01)* nx;
-                b.y=(current_R - 0.01)* ny;
-            	}
-        	}
-    	}
+            }
+        }
     }
 
-    void run() {
+    void run()
+    {
         double t = 0, dt = 0.001;
-        while(t < 1000) {
-            for(auto &tl : swarm) tl.computeInternalForces(t);
+        while (t < 1000)
+        {
+            for (auto &tl : swarm)
+                tl.computeInternalForces(t);
             applyStericForces();
             handleCircularBoundary();
-            for(auto &tl : swarm) tl.updatePhysics(dt);
+            for (auto &tl : swarm)
+                tl.updatePhysics(dt);
             t += dt;
         }
     }
