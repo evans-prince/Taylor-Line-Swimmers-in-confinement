@@ -2,16 +2,12 @@
 #include <vector>
 #include <cmath>
 
-struct Bead
-{
-    double x, y, vx, vy, fx, fy;
-};
 
 class Simulation
 {
 public:
     std::vector<TaylorLine> swarm;
-    double R; // Radius to be decreased
+    double current_R; // Radius to be decreased
 
     // PARTNER A: Prevent swimmers from overlapping
     void applyStericForces()
@@ -20,7 +16,7 @@ public:
 
         double r0 = 1.0;                    // r0=a0 as per reaserch paper
         double epsilon = 13.75;             // strenth of potential
-        double cutoff = pow(2, 1 / 6) * r0; // potential applied only when r<cutoff
+        double cutoff = pow(2, 1.0 / 6.0) * r0; // potential applied only when r<cutoff
         double cutoff_sq = cutoff * cutoff; // we will measure r_sq < cutoff_sq
 
         for (int i = 0; i < swarm.size(); i++)
@@ -49,14 +45,19 @@ public:
                             double r0_r12 = r0_r6 * r0_r6;
                             double f_mag = (48 * e_r) * (r0_r12 - 0.5 * r0_r6);
 
+                            // Clamp huge forces to prevent numerical explosion
+                            const double MAX_FORCE = 1000.0;
+                            if (f_mag > MAX_FORCE) f_mag = MAX_FORCE;
+                            else if (f_mag < -MAX_FORCE) f_mag = -MAX_FORCE;
+
                             // decomposing forces
                             double fdx = f_mag * (dx / r);
                             double fdy = f_mag * (dy / r);
 
-                            beadI.fx += fx;
-                            beadI.fy += fy;
-                            beadJ.fx -= fx;
-                            beadJ.fy -= fy;
+                            beadI.fx += fdx;
+                            beadI.fy += fdy;
+                            beadJ.fx -= fdx;
+                            beadJ.fy -= fdy;
                         }
                     }
                 }
@@ -98,18 +99,5 @@ public:
         }
     }
 
-    void run()
-    {
-        double t = 0, dt = 0.001;
-        while (t < 1000)
-        {
-            for (auto &tl : swarm)
-                tl.computeInternalForces(t);
-            applyStericForces();
-            handleCircularBoundary();
-            for (auto &tl : swarm)
-                tl.updatePhysics(dt);
-            t += dt;
-        }
-    }
+
 };
