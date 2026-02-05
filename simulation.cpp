@@ -45,10 +45,10 @@ public:
                             double r0_r12 = r0_r6 * r0_r6;
                             double f_mag = (48 * e_r) * (r0_r12 - 0.5 * r0_r6);
 
-                            // Clamp huge forces to prevent numerical explosion
-                            const double MAX_FORCE = 1000.0;
-                            if (f_mag > MAX_FORCE) f_mag = MAX_FORCE;
-                            else if (f_mag < -MAX_FORCE) f_mag = -MAX_FORCE;
+                            // // Clamp huge forces to prevent numerical explosion
+                            // const double MAX_FORCE = 1000.0;
+                            // if (f_mag > MAX_FORCE) f_mag = MAX_FORCE;
+                            // else if (f_mag < -MAX_FORCE) f_mag = -MAX_FORCE;
 
                             // decomposing forces
                             double fdx = f_mag * (dx / r);

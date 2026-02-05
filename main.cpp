@@ -28,7 +28,10 @@ void initializeSwarm(Simulation& sim) {
 
     std::uniform_real_distribution<> dis(0.0, 1.0);
 
-    for (int i = 0; i < NUM_SWIMMERS; i++) {
+    int attempts = 0;
+    int accepted = 0;
+    while (accepted < NUM_SWIMMERS && attempts < 100000) {  // Safety break
+        attempts++;
 
         TaylorLineConfig config;
         config.nu = 0.005;
@@ -37,20 +40,55 @@ void initializeSwarm(Simulation& sim) {
         TaylorLine swimmer(config);
         swimmer.initialize();
 
+        // Calculate half-length for centering
+        double half_length = (swimmer.N - 1) * swimmer.l0 / 2.0;
+
         // random position
         double cx, cy, r_sq;
-        do {
-            cx = (dis(gen) * 2.0 - 1.0) * (RADIUS );
-            cy = (dis(gen) * 2.0 - 1.0) * (RADIUS );
-            r_sq = cx*cx + cy*cy;
-        } while (r_sq > (RADIUS)*(RADIUS));
+        double safe_radius = RADIUS - half_length - 2.0; // Ensure whole swimmer fits inside
+        if (safe_radius < 0) safe_radius = 1.0; // Fallback just in case
 
+        do {
+            cx = (dis(gen) * 2.0 - 1.0) * (safe_radius);
+            cy = (dis(gen) * 2.0 - 1.0) * (safe_radius);
+            r_sq = cx*cx + cy*cy;
+        } while (r_sq > safe_radius * safe_radius);
+
+        // Shift beads (centering)
         for (auto& bead : swimmer.beads) {
-            bead.x += cx;
+            bead.x += cx - half_length; // Align center to cx (assuming horizontal init)
             bead.y += cy;
         }
 
-        sim.swarm.push_back(swimmer);
+        // --- OVERLAP CHECK ---
+        bool overlaps = false;
+        double min_dist_sq = 1.2 * 1.2; // slightly larger than cutoff (1.12) to be safe
+
+        for (const auto& existing_swimmer : sim.swarm) {
+            for (const auto& existing_bead : existing_swimmer.beads) {
+                for (const auto& new_bead : swimmer.beads) {
+                    double dx = existing_bead.x - new_bead.x;
+                    double dy = existing_bead.y - new_bead.y;
+                    if (dx*dx + dy*dy < min_dist_sq) {
+                        overlaps = true;
+                        break;
+                    }
+                }
+                if (overlaps) break;
+            }
+            if (overlaps) break;
+        }
+
+        if (!overlaps) {
+            sim.swarm.push_back(swimmer);
+            accepted++;
+            if (accepted % 10 == 0) cout << "." << flush;
+        }
+    }
+    cout << endl;
+
+    if (accepted < NUM_SWIMMERS) {
+        cout << "WARNING: Could only place " << accepted << " swimmers without overlap." << endl;
     }
     cout << "Initialization Complete." << endl;
 }
