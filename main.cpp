@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdlib>
 #include <fstream>
 #include <vector>
 #include <cmath>
@@ -94,7 +95,7 @@ void initializeSwarm(Simulation& sim) {
 }
 
 void saveFrameForGnuplot(const Simulation& sim, int frameNum) {
-    string filename = "file" + to_string(frameNum) + ".txt";
+    string filename = "data/file" + to_string(frameNum) + ".txt";
     ofstream outfile(filename);
 
     if (!outfile.is_open()) return;
@@ -116,6 +117,7 @@ int main() {
     int frame_count = 0;
 
     cout << "Starting Simulation..." << endl;
+    system("mkdir -p data");
 
     //  force - velocity - position
     for (int step=0; step<=total_steps; step++) {
