@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-
+#include "TaylorLine.h"
 
 class Simulation
 {
@@ -14,10 +14,10 @@ public:
     {
         // Truncated Lennard-Jones potential for every beads on different swimmers
 
-        double r0 = 1.0;                    // r0=a0 as per reaserch paper
-        double epsilon = 13.75;             // strenth of potential
+        double r0 = 1.0;                        // r0=a0 as per reaserch paper
+        double epsilon = 13.75;                 // strenth of potential
         double cutoff = pow(2, 1.0 / 6.0) * r0; // potential applied only when r<cutoff
-        double cutoff_sq = cutoff * cutoff; // we will measure r_sq < cutoff_sq
+        double cutoff_sq = cutoff * cutoff;     // we will measure r_sq < cutoff_sq
 
         for (int i = 0; i < swarm.size(); i++)
         {
@@ -98,6 +98,4 @@ public:
             }
         }
     }
-
-
 };
