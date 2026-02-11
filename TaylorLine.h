@@ -169,7 +169,11 @@ public:
     // UPDATE VELOCITIES FROM FORCES
     // Applies: a = F/m, then v += a*dt with damping
     // ----------------------------------------------------------
-    void updateVelocities(double dt)
+    // ----------------------------------------------------------
+    // UPDATE VELOCITIES FROM FORCES
+    // Applies: a = F/m, then v += a*dt with damping
+    // ----------------------------------------------------------
+    virtual void updateVelocities(double dt, bool add_swimming = true)
     {
         for (auto &bead : beads)
         {
@@ -183,7 +187,7 @@ public:
             bead.vy += ay * dt;
         }
     }
-
+    
     // ----------------------------------------------------------
     // UPDATE POSITIONS (Euler integration)
     // Applies: r += v*dt
@@ -208,36 +212,6 @@ public:
         updateVelocities(dt);
         updatePositions(dt);
     }
-
-    // ----------------------------------------------------------
-    // GET CENTER OF MASS POSITION
-    // Useful for tracking swimmer motion
-    // ----------------------------------------------------------
-    // void getCenterOfMass(double &cx, double &cy) const {
-    //     cx = 0.0;
-    //     cy = 0.0;
-    //     for (const auto &bead : beads) {
-    //         cx += bead.x;
-    //         cy += bead.y;
-    //     }
-    //     cx /= N;
-    //     cy /= N;
-    // }
-
-    // ----------------------------------------------------------
-    // GET CENTER OF MASS VELOCITY
-    // Useful for measuring swimming speed
-    // ----------------------------------------------------------
-    // void getCenterOfMassVelocity(double &vx_cm, double &vy_cm) const {
-    //     vx_cm = 0.0;
-    //     vy_cm = 0.0;
-    //     for (const auto &bead : beads) {
-    //         vx_cm += bead.vx;
-    //         vy_cm += bead.vy;
-    //     }
-    //     vx_cm /= N;
-    //     vy_cm /= N;
-    // }
 };
 
 // ==================== TAYLOR LINE WITH CONSTANT SPEED ====================
@@ -264,7 +238,7 @@ public:
     // Applies overdamped dynamics plus constant swimming velocity
     // V0 along head→tail direction
     // ----------------------------------------------------------
-    void updateVelocities(double dt)
+    void updateVelocities(double dt, bool add_swimming = true)
     {
         // Compute unit direction from tail (bead 0) to head (last bead)
         double dx = beads[N - 1].x - beads[0].x;
@@ -294,8 +268,10 @@ public:
             bead.vy += ay * dt;
 
             // Add constant swimming velocity along head-tail direction
-            bead.vx += vSwimX;
-            bead.vy += vSwimY;
+            if (add_swimming) {
+                bead.vx += vSwimX;
+                bead.vy += vSwimY;
+            }
         }
     }
 

@@ -120,24 +120,52 @@ int main() {
     system("mkdir -p data");
 
     //  force - velocity - position
+    // --- VELOCITY VERLET INITIALIZATION ---
+    // Compute forces at t=0 before the loop
+    double t = 0.0;
+    for (auto& swimmer : sim.swarm) {
+        swimmer.computeInternalForces(t);
+    }
+    sim.applyStericForces();
+    sim.handleCircularBoundary(); // Note: This might reflect v(0) if initially overlapping (unlikely)
+
+    //  force - velocity - position
     for (int step=0; step<=total_steps; step++) {
-        double t = step*DT;
+        
+        // 1. First Half-Kick: v(t + dt/2) = v(t) + 0.5 * a(t) * dt
+        // We do NOT add swimming velocity here (it's added at the end or distributed)
+        // To strictly follow "add V0 every step", we add it once per full step.
+        // We'll add it in the second half.
         for (auto& swimmer : sim.swarm) {
-            swimmer.computeInternalForces(t);
+            swimmer.updateVelocities(0.5 * DT, false);
         }
-        sim.applyStericForces();
-        sim.handleCircularBoundary();
+
+        // 2. Drift: r(t + dt) = r(t) + v(t + dt/2) * dt
         for (auto& swimmer : sim.swarm) {
-            swimmer.updateVelocities(DT);
             swimmer.updatePositions(DT);
         }
+        
+        // 3. Compute Forces at new position: a(t + dt)
+        double t_next = (step + 1) * DT;
+        for (auto& swimmer : sim.swarm) {
+            swimmer.computeInternalForces(t_next);
+        }
+        sim.applyStericForces();
+        sim.handleCircularBoundary(); // Reflects v(t + dt/2) if collision occurs
+
+        // 4. Second Half-Kick: v(t + dt) = v(t + dt/2) + 0.5 * a(t + dt) * dt
+        // We Add Swimming Velocity HERE (once per step)
+        for (auto& swimmer : sim.swarm) {
+            swimmer.updateVelocities(0.5 * DT, true);
+        }
+
         // save frame
         if (step % SAVE_EVERY_STEPS == 0) {
             saveFrameForGnuplot(sim, frame_count);
 
             // progress bar
             if (frame_count % 10 == 0) {
-                cout << "\rFrame " << frame_count << " saved (t=" << t << ")" << flush;
+                cout << "\rFrame " << frame_count << " saved (t=" << t_next << ")" << flush;
             }
             frame_count++;
         }
