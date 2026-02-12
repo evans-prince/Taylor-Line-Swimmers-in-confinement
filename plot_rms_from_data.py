@@ -18,7 +18,7 @@ def read_frame_file(filepath):
             lines = f.readlines()
         for line in lines:
             parts = line.split()
-            if len(parts) == 2:
+            if len(parts) == 8:
                 x, y = float(parts[0]), float(parts[1])
                 current_swimmer.append((x, y))
             elif not parts and current_swimmer:
@@ -81,17 +81,16 @@ def main():
         rms_distances.append(rms)
 
     plt.figure(figsize=(10, 6))
-    plt.plot(times, rms_distances, 'b.-', linewidth=1, markersize=4, label='RMSD')
-    plt.xlabel('Time (seconds)')
-    plt.ylabel('RMS Displacement ($a_0$)')
-    plt.title(f'RMS Displacement (N={num_swimmers})')
+    plt.plot(np.log(times), np.log(rms_distances), 'b.-', linewidth=1, markersize=4, label='RMSD')
+    plt.xlabel('Log ( Time (seconds) ) ')
+    plt.ylabel('Log (RMS Displacement ) ($a_0$)')
+    plt.title(f'RMS Displacement  vs Time curve in Log Scale (N={num_swimmers})')
     plt.grid(True, linestyle='--', alpha=0.7)
     plt.legend()
     plt.text(0.02, 0.95, f"a0: 1.0", transform=plt.gca().transAxes, 
              fontsize=10, verticalalignment='top', bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
 
     plt.savefig("rms_plot_from_data.png", dpi=300)
-    plt.show()
 
 if __name__ == "__main__":
     main()
