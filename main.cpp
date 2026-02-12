@@ -102,7 +102,7 @@ void saveFrameForGnuplot(const Simulation& sim, int frameNum) {
 
     for (const auto& swimmer : sim.swarm) {
         for (const auto& bead : swimmer.beads) {
-            outfile << bead.x << " " << bead.y << "\n";
+            outfile << bead.x << " " << bead.y << " | " << bead.vx << " " << bead.vy << " | " << bead.fx << " " << bead.fy<< "\n";
         }
         outfile << "\n\n"; // Double newline for Gnuplot
     }
