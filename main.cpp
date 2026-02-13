@@ -94,6 +94,23 @@ void initializeSwarm(Simulation& sim) {
     cout << "Initialization Complete." << endl;
 }
 
+void saveCOMData(const Simulation& sim, int frameNum) {
+    string filename = "COMdata/file" + to_string(frameNum) + ".txt";
+    ofstream outfile(filename);
+
+    if (!outfile.is_open()) return;
+
+    for (const auto& swimmer : sim.swarm) {
+        double cx, cy, cvx, cvy, cfx, cfy;
+        swimmer.getCenterOfMass(cx, cy);
+        swimmer.getCenterOfMassVelocity(cvx, cvy);
+        swimmer.getCenterOfMassForce(cfx, cfy);
+        
+        outfile << cx << " " << cy << " | " << cvx << " " << cvy << " | " << cfx << " " << cfy << "\n";
+    }
+    outfile.close();
+}
+
 void saveFrameForGnuplot(const Simulation& sim, int frameNum) {
     string filename = "data/file" + to_string(frameNum) + ".txt";
     ofstream outfile(filename);
@@ -118,6 +135,7 @@ int main() {
 
     cout << "Starting Simulation..." << endl;
     system("mkdir -p data");
+    system("mkdir -p COMdata");
 
     //  force - velocity - position
     // --- VELOCITY VERLET INITIALIZATION ---
@@ -131,7 +149,7 @@ int main() {
 
     //  force - velocity - position
     for (int step=0; step<=total_steps; step++) {
-        
+
         // 1. First Half-Kick: v(t + dt/2) = v(t) + 0.5 * a(t) * dt
         // We do NOT add swimming velocity here (it's added at the end or distributed)
         // To strictly follow "add V0 every step", we add it once per full step.
@@ -144,7 +162,7 @@ int main() {
         for (auto& swimmer : sim.swarm) {
             swimmer.updatePositions(DT);
         }
-        
+
         // 3. Compute Forces at new position: a(t + dt)
         double t_next = (step + 1) * DT;
         for (auto& swimmer : sim.swarm) {
@@ -162,6 +180,7 @@ int main() {
         // save frame
         if (step % SAVE_EVERY_STEPS == 0) {
             saveFrameForGnuplot(sim, frame_count);
+            saveCOMData(sim, frame_count);
 
             // progress bar
             if (frame_count % 10 == 0) {

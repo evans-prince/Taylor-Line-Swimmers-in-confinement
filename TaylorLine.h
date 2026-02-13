@@ -189,6 +189,46 @@ public:
     }
     
     // ----------------------------------------------------------
+    // GET CENTER OF MASS POSITION
+    // ----------------------------------------------------------
+    void getCenterOfMass(double &cx, double &cy) const {
+        cx = 0.0;
+        cy = 0.0;
+        for (const auto &bead : beads) {
+            cx += bead.x;
+            cy += bead.y;
+        }
+        cx /= N;
+        cy /= N;
+    }
+
+    // ----------------------------------------------------------
+    // GET CENTER OF MASS VELOCITY
+    // ----------------------------------------------------------
+    void getCenterOfMassVelocity(double &cvx, double &cvy) const {
+        cvx = 0.0;
+        cvy = 0.0;
+        for (const auto &bead : beads) {
+            cvx += bead.vx;
+            cvy += bead.vy;
+        }
+        cvx /= N;
+        cvy /= N;
+    }
+
+    // ----------------------------------------------------------
+    // GET CENTER OF MASS FORCE
+    // ----------------------------------------------------------
+    void getCenterOfMassForce(double &cfx, double &cfy) const {
+        cfx = 0.0;
+        cfy = 0.0;
+        for (const auto &bead : beads) {
+            cfx += bead.fx;
+            cfy += bead.fy;
+        }
+    }
+
+    // ----------------------------------------------------------
     // UPDATE POSITIONS (Euler integration)
     // Applies: r += v*dt
     // ----------------------------------------------------------
