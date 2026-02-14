@@ -11,7 +11,7 @@
 
 using namespace std;
 
-const int NUM_SWIMMERS = 200;
+const int NUM_SWIMMERS = 100;
 const double RADIUS = 100.0;
 const double TOTAL_TIME = 100.0;
 const double DT = 0.001;
