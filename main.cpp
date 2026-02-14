@@ -35,7 +35,7 @@ void initializeSwarm(Simulation& sim) {
         attempts++;
 
         TaylorLineConfig config;
-        config.nu = 0.005;
+        config.nu = 0.001;
         config.phi = dis(gen) * 2 * PI;
 
         TaylorLine swimmer(config);

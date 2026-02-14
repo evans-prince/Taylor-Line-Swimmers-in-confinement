@@ -13,7 +13,7 @@ struct TaylorLineConfig
     double mass = 10.0;        // Bead mass (paper: 10m)
 
     // ==== Tunable Parameters (may need adjustment) ====
-    double nu = 0.005;   // Beating frequency ν (paper range: 0.001 - 0.009)
+    double nu = 0.001;   // Beating frequency ν (paper range: 0.001 - 0.009)
     double phi = 0.0;    // Initial phase φ (paper: random for each swimmer)
     double gamma = 10.0; // Damping coefficient (not in paper - uses MPCD)
     double V0 = 0.0;     // Constant swimming speed along head→tail direction
