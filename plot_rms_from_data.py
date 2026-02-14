@@ -8,7 +8,8 @@ import glob
 DATA_DIR = "COMdata"
 N_BEADS = 100 
 DT_FRAME = 0.5 
-OFFSET_TIME = 50.0 
+OFFSET_TIME = 10.0 
+LOG_BOUNDS = [1.9, 3.9] # Tunable regime boundaries
 
 def read_frame_file(filepath):
     swimmers = []
@@ -70,11 +71,26 @@ def main():
         return
 
     plt.figure(figsize=(10, 6))
-    plt.plot(np.log(times), np.log(rms_distances), 'b.-', linewidth=1, markersize=4, label='RMSD')
-    plt.xlabel('Log ( Time (seconds) ) ')
-    plt.ylabel('Log (RMS Displacement ) ($a_0$)')
-    plt.title(f'RMS Displacement vs Time (Log Scale, N={num_swimmers})')
-    plt.grid(True, linestyle='--', alpha=0.7)
+    lt, lr = np.log(times), np.log(rms_distances)
+    plt.plot(lt, lr, 'b.-', linewidth=1, markersize=4, label='RMSD')
+    
+    full_lb = [lt[0]] + LOG_BOUNDS + [lt[-1]]
+    for i in range(len(full_lb)-1):
+        lb0, lb1 = full_lb[i], full_lb[i+1]
+        mask = (lt >= lb0) & (lt <= lb1)
+        if np.sum(mask) < 2: continue
+        m, _ = np.polyfit(lt[mask], lr[mask], 1)
+        
+        if i < len(full_lb)-2: plt.axvline(full_lb[i+1], color='black', linestyle=':', linewidth=1)
+        
+        lbl = r"Ballistic $\sim t$" if m > 0.8 else r"Diffusive $\sim t^{0.5}$" if m > 0.4 else "Saturation (Confinement)" if m < 0.2 else "Sub-diffusive"
+        plt.text((lb0+lb1)/2, 0.02, f"{lbl}\ns={m:.2f}", transform=plt.gca().get_xaxis_transform(), 
+                 ha='center', va='bottom', fontsize=10, color='black', fontweight='bold')
+
+    plt.xlabel('Log ( Time (s) ) ')
+    plt.ylabel('Log (RMS) ($a_0$)')
+    plt.title(f'RMS vs Time: Regimes & Slopes (N={num_swimmers}, Beating Freq = to be edited by priyanshu)')
+    plt.grid(True, linestyle='--', alpha=0.3)
     plt.legend()
     plt.text(0.02, 0.95, f"a0: 1.0", transform=plt.gca().transAxes, 
              fontsize=10, verticalalignment='top', bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
