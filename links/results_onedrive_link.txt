@@ -1,0 +1,11 @@
+## Dataset
+
+The dataset is too large to be stored in this repository.
+
+Download it from:
+https://csciitd-my.sharepoint.com/:f:/g/personal/ph1221248_iitd_ac_in/IgBVkgZqNjeFQZ-eFpwe6mbXARK7FOuTvwKuDNCn11Wd2kY?e=esN7NM
+
+Instructions:
+1. Download
+2. Extract
+3. Place inside `results/` folder

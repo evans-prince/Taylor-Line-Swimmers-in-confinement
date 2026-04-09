@@ -1,0 +1,145 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{setspace}
+
+\title{\Huge \textbf{Microswimmers in Confinement: Self-Organization, Sterics, and Bimotility Segregations} \\ \vspace{0.5cm} \Large Final Technical Report}
+\author{\textbf{Prince Evans (2022PH11248)} \& \textbf{Priyanshu Deora (2022PH11855)} \\ Supervisor: Prof. Sujin B. Babu \\ \\ Department of Physics \\ Indian Institute of Technology Delhi}
+\date{April 2026}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\newpage
+\pagenumbering{arabic}
+\doublespacing
+
+\begin{abstract}
+Understanding Microswimmers is crucial as they are self-propelled microscopic particles that continuously convert energy into directed motion. This project computationally investigates the "self-organization in a bimotility mixture" of artificial swimmers trapped within a shrinking circular confining boundary. By utilizing the framework originally derived from G.I. Taylor's 1951 analysis, we explore the minimal components of collective behavior: steric interactions and self-propulsion without calculating exhaustive hydrodynamic couplings. We monitor phase separation, spatial clustering, and velocity correlations to evaluate how shifting active parameters ($\nu$ and $b$) dictate macroscopic state changes over prolonged durations. Furthermore, the deployment of a numerical Andersen Thermostat controls adiabatic heating injected into the bounded domain, actively mapping out ballistic and diffusive regimes in a controlled $NVT$ ensemble environment.
+\end{abstract}
+
+\vspace{1cm}
+
+\tableofcontents
+
+\newpage
+
+\section{Introduction and Motivation}
+Microswimmers are self-propelled entities that can individually maneuver through complex ﬂuid environments. This class includes biological entities such as bacteria and spermatozoa, as well as synthetic micromotors engineered for targeted biomedical applications.
+
+As extensively stated in literature, boundaries have a significant impact on collective motion and can create clustering and boundary accumulation that are rarely present in bulk systems \cite{Agrawal2018}. Real-world environments are rarely unbounded. For example, bacteria swimming in capillaries exhibit physical transport and organizational dynamics fundamentally altered by the spatial restrictions around them.
+
+The primary aim of this project is to study the collective dynamics of Taylor-line microswimmers conﬁned within a rigid circular boundary using localized numerical simulations. We hypothesize that introducing a mixture of active entities (a bimotility mixture differing solely in their fundamental propulsion speeds/frequencies) will lead to phase segregation purely derived from excluded-volume steric repulsions and constrained boundary interactions.
+
+\section{Methodology and Computational Setup}
+This study strictly isolates two major components of collective behavior:
+1. Steric interactions (hard-particle repulsions).
+2. Mechanically induced self-propulsion.
+
+By intentionally streamlining the environmental constraints and suspending purely ﬂuid-based Navier-Stokes hydrodynamics, the simulation enjoys lowered computational complexity. This framework guarantees an opportunity to run high-density, large-scale spatial simulations which exclusively isolate universal mechanical effects derived from structural collisions.
+
+\subsection{Filament Design: The Taylor Line}
+G.I. Taylor established that low Reynolds number entities cannot propel themselves through reciprocal motions (colloquially termed the "Scallop Theorem") \cite{Taylor1951}. Therefore, we model the physical swimmer as a discrete chain of $N$ monomers (beads) held together by rigid structural forces.
+
+\subsubsection{Hookean Spring Constraints}
+The linear elasticity preserving the physical continuous nature of the ﬁlament acts through standard Hookean restoring forces:
+\begin{equation}
+\mathbf{F}_s = k_s(r - l_0)\hat{\mathbf{r}}
+\end{equation}
+This mathematically enforces an unyielding inextensibility, sustaining the structural limits of the Taylor Line against mechanical shearing.
+
+\subsubsection{Active Bending Potential}
+To simulate the active undulation of a flagellum, a sinusoidal curvature wave oscillates along the body, explicitly generating asymmetric forward propagation. This mathematical wave takes the form:
+\begin{equation}
+c(i, t) = b \sin\left[2\pi\left(\nu t + \frac{2i}{N}\right) + \phi\right]
+\end{equation}
+where parameter $b$ controls the physical amplitude of the internal wave, $\nu$ dictates the beating frequency natively dictating swimming velocity, and $\phi$ is an offset phase shift ensuring desynchronization amongst separate individuals. Discrete curvature vectors ($\mathbf{C}_i = \mathbf{r}_{i+1} - 2\mathbf{r}_i + \mathbf{r}_{i-1}$) invoke the final internal bending forces applied to each respective monomer in the chain.
+
+\newpage
+
+\subsection{Particle-Particle Interaction Kinetics}
+To precisely simulate physical embodiment, mathematical overlapping is prohibited using highly repulsive potentials.
+
+\subsubsection{Truncated Lennard-Jones (WCA) Potential}
+A pure repulsive constraint prevents the intersecting of particles via the Weeks-Chandler-Andersen (WCA) formulation:
+\begin{equation}
+V_{LJ} = 4\epsilon \left[ \left(\frac{r_o}{r}\right)^{12} - \left(\frac{r_o}{r}\right)^{6} \right] \quad \text{for} \quad r < 2^{1/6}r_o
+\end{equation}
+where $r_o$ acts as the exclusion radius length-scale and $\epsilon$ configures interaction strength. Unlike typical bulk fluid simulations, the cutoff enforces strictly repulsive barriers mimicking impermeable solid barriers between moving monomers.
+
+\subsection{Simulation Engine and Integration Iterations}
+Simulations are primarily maintained natively in C++ executing on the Baadal HPC available at IIT Delhi. The state-space matrix propagates according to rigid physical timestep increments:
+\begin{enumerate}
+    \item \textbf{Initialization}: Filaments are placed completely at random assuring zero spatial overlaps.
+    \item \textbf{Verlet Dynamics}: In order to accurately map momentum and physical collisions over vast timespans cleanly, positional coordinates iterate synchronously utilizing a stable Velocity Verlet numerical integration. 
+    \item \textbf{Thermodynamic Adherence}: Adiabatic contraction of the encompassing boundary wall naturally injects uncontrollable energy loads into the particulate domain. Thus, numerical execution passes through a deterministic \textbf{Andersen Thermostat}. Colliding components are periodically re-thermalized from a targeted Maxwell-Boltzmann distribution, holding the system mathematically locked within the $NVT$ thermal ensemble parameters.
+\end{enumerate}
+
+\newpage
+
+\section{Boundary Mechanics and Dynamic Simulation Tracking}
+
+Boundaries actively reflect the orthogonal velocity components of any incoming monomers, physically trapping swarms within set radii ($R = 100a_0$ to $R = 75a_0$). The radial parameter dynamically scales creating compression regimes. Real-time logging asynchronously captures position matrices and respective kinematic datasets mapped strictly to native Gnuplot and Matplotlib rendering frameworks.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../results/results_b0.200_nu0.005_v0.100_N200_R150/velocity_correlation.png}
+    \caption{Velocity autocorrelation map derived from confined swimmers tracking exponential angular decay. Note the complete loss of orientation memory traversing prolonged spatial intervals within strong boundaries.}
+    \label{fig:vcorr}
+\end{figure}
+
+Velocity autocorrelations reveal distinct structural oscillations corresponding directly to the driving beating frequencies ($\nu$). The plotted variables reliably confirm a loss of temporal memory as chaotic collisions overtake ballistic intentions over larger temporal windows (Figure \ref{fig:vcorr}).
+
+\newpage
+
+\section{Analysis: Spatial Phase Segregations and Clustering}
+Simulations demonstrably show swimmers naturally accumulating near boundaries. A macroscopic visualization isolates heavy boundary accumulation and structural aggregation when population densities ($N$) saturate the inner void geometries.
+
+We specifically witness the emergence of distinct kinetic regimes as plotted via isolated Center of Mass (COM) coordinates. The Root Mean Square Displacement (RMS) logs accurately map spatial diffusions cleanly spanning multiple magnitudes.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{../results/results_b0.200_nu0.005_v0.100_N200_R150/rms_plot_from_data.png}
+    \caption{Logarithmic mapping of tracking Root Mean Square (RMS) displacement against extensive time sequences. Initial phases indicate ballistic forward propagation (slope $\approx 1.0$), transitioning into crowded sub-diffusive behavior before ultimately experiencing saturation entirely governed by the geometric boundary wall radius ($r$).}
+    \label{fig:rms_plot_1}
+\end{figure}
+
+The transition points demarcating boundary collision parameters cleanly define spatial traversal saturation (Figure \ref{fig:rms_plot_1}). 
+
+\newpage
+
+\subsection{High Performance Job Deployments}
+Computational data tracking and large scale rendering operations occurred utilizing multi-stage processing limits natively across local multicore terminals and scaled remotely to the Baadal HPC cluster situated at IIT Delhi. Resilient shell automation tracked checkpointing metrics assuring uninterrupted tracking despite external workload factors spanning semester examination timelines.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{../results/results_b0.100_nu0.005_v0.200_N200_R200/rms_plot_from_data.png}
+    \caption{Extended parameter evaluation (R=200, N=200). Note the significantly elevated saturation limits reached natively due to relaxed boundary constraints allowing expanded initial diffusion patterns before spatial cutoff limits strictly force confinement constraints.}
+    \label{fig:rms_plot_extended}
+\end{figure}
+
+\newpage
+
+\subsection{Bimotility Limits (Agrawal \& Babu)}
+According to previous theoretical findings \cite{Agrawal2018}, varying combinations of relative physical beating frequencies $\delta \nu$ initiate complex aggregations and spatial bifurcations not generally seen in homogeneous microswimmer settings. With boundary-centric clustering properly defined computationally, secondary analysis will mathematically track the respective segregation indices outlining spatial differences solely forced by $\delta \nu$ discrepancies isolated completely from boundary wall impacts.
+
+\section{Conclusions}
+In conclusion, the executed simulation properly encodes the non-reciprocal fundamental propulsion elements defined originally by G.I. Taylor. Using pure hard-body WCA interactions natively managed under a Velocity Verlet framework, the tracking architecture visually reproduces the spatial agglomeration and internal boundary saturation limits typical of active matter physics. Continuous updates implementing an Andersen Theromstat accurately insulate against adiabatic heating induced during real-time boundary contraction phases guaranteeing highly authentic thermodynamic representations throughout the experimental sweep.
+
+\newpage
+
+\begin{thebibliography}{9}
+\bibitem{Taylor1951} 
+Taylor, G.I., 1951. \textit{Analysis of the swimming of microscopic organisms}. Proceedings of the Royal Society of London. Series A. Mathematical and Physical Sciences, 209(1099), pp.447-461.
+\bibitem{Agrawal2018} 
+Agrawal, A. and Babu, S.B., 2018. \textit{Self-organization in a bimotility mixture of model microswimmers}. Physical Review E, 97(2), p.020401.
+\end{thebibliography}
+
+\end{document}

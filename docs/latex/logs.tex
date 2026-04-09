@@ -1,0 +1,176 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\title{BTP Progress Log: Microswimmer Bimotility Simulation}
+\author{Prince Evans  \& Priyanshu Deora \\ \small Supervisor: Prof. Sujin B. Babu}
+\date{December 2025 - April 2026}
+
+\begin{document}
+
+\maketitle
+
+\section*{Week 1: Project Initiation \& Literature Review}
+\textbf{Interval:} December 15, 2025 -- December 21, 2025
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Paper Analysis:} Reviewed "Self-organization in a bimotility mixture of model microswimmers" by Adyant Agrawal and Sujin B. Babu[cite: 3, 4].
+    \item \textbf{Model Definition:} Identified the Taylor line as a discretized model of the Taylor sheet for microswimmer simulation[cite: 20, 36].
+    \item \textbf{Research Objective:} To study cooperation and segregation in mixtures differing in propulsion speed[cite: 8, 32].
+    \item \textbf{Task Distribution:}
+    \begin{itemize}
+        \item \textbf{Partner A:} Environment physics (Circular boundary and Steric interactions).
+        \item \textbf{Partner B:} Swimmer internals (Chain physics and Propulsion engine).
+    \end{itemize}
+\end{itemize}
+
+\section*{Week 2: Implementation of Dry Simulation}
+\textbf{Interval:} December 22, 2025 -- December 28, 2025
+
+\subsection*{Partner A: Boundary \& Steric Interaction}
+\begin{itemize}[noitemsep]
+    \item \textbf{Confinement Logic:} Implemented rigid circular boundary conditions as per paper specifications[cite: 49, 169].
+    \item \textbf{Reflection Algorithm:} Coded velocity reflection along the normal vector for bead-boundary collisions.
+    \item \textbf{Steric Force:} Implemented the truncated Lennard-Jones potential[cite: 62, 63]:
+    \[ V_{l}=4\epsilon\left[\left(\frac{r_{o}}{r}\right)^{12}-\left(\frac{r_{o}}{r}\right)^{6}\right] \text{ for  }  r < 2^{1/6}r_o \]
+    \item \textbf{Interaction Parameters:} Set $\epsilon = 13.75$ and $r_o = a_0$ to model swimmer-swimmer repulsion[cite: 66].
+\end{itemize}
+
+\subsection*{Partner B: Taylor Line Internal Physics}
+\begin{itemize}[noitemsep]
+    \item \textbf{Swimmer Representation:} Each swimmer is modeled as a discretized Taylor line composed of beads connected in sequence, capturing undulatory microswimmer motion at low Reynolds number.
+    \item \textbf{Elastic Spring Forces:} Neighboring beads interact via Hookean springs
+    \[
+    \mathbf{F}_s = k_s(r - l_0)\hat{\mathbf{r}}
+    \]
+    ensuring inextensibility and structural integrity of the swimmer.
+    \item \textbf{Active Bending Mechanism:} A traveling sinusoidal curvature wave is imposed along the body to generate propulsion, given by
+    \[
+    c(i, t) = b \sin\left[2\pi\left(\nu t + \frac{2i}{N}\right) + \phi\right]
+    \]
+    \item \textbf{Bending Force Formulation:} Discrete curvature
+    \[
+    \mathbf{C}_i = \mathbf{r}_{i+1} - 2\mathbf{r}_i + \mathbf{r}_{i-1}
+    \]
+    produces bending forces
+    \[
+    \mathbf{F}_b = \kappa \, c(i, t) \, \mathbf{C}_i
+    \]
+    \item \textbf{Verlet Dynamics:} Bead motion follows momentum-conserving dynamics
+    \[
+    \gamma \mathbf{v}_i = \mathbf{F}_i, \quad \mathbf{r}_i(t + \Delta t) = \mathbf{r}_i(t) + \mathbf{v}_i \Delta t
+    \]
+    \item \textbf{Outcome:} The implemented internal physics yields smooth, force-free, self-propelled Taylor-line swimmers consistent with theoretical and experimental microswimmer models.
+\end{itemize}
+\section*{Week 3: }
+\textbf{Interval:} Dec 29, 2025 -- Jan 4, 2026
+
+\begin{itemize}[noitemsep]
+    \item Review phase and minor code refactoring. No major commits.
+\end{itemize}
+
+\section*{Week 4: }
+\textbf{Interval:} Jan 5, 2026 -- Jan 11, 2026
+
+\begin{itemize}[noitemsep]
+    \item Continued review and planning phase.
+\end{itemize}
+
+\section*{Week 5: }
+\textbf{Interval:} Jan 12, 2026 -- Jan 18, 2026
+
+\begin{itemize}[noitemsep]
+    \item Physics research and algorithm design for continuous updates.
+\end{itemize}
+
+\section*{Week 6: }
+\textbf{Interval:} Jan 19, 2026 -- Jan 25, 2026
+
+\begin{itemize}[noitemsep]
+    \item \textbf{[Partner B (Priyanshu)]} Updated Taylor line configuration matrices and updated core physics interactions representing flexible boundaries.
+\end{itemize}
+
+\section*{Week 7: }
+\textbf{Interval:} Jan 26, 2026 -- Feb 1, 2026
+
+\begin{itemize}[noitemsep]
+    \item \textbf{[Partner A (Prince)]} Conducted a major system refactoring. Resolved core logic bugs and completed a total rewrite of \texttt{main.cpp} for structural integrity.
+\end{itemize}
+
+\section*{Week 8: }
+\textbf{Interval:} Feb 2, 2026 -- Feb 8, 2026
+
+\begin{itemize}[noitemsep]
+    \item \textbf{[Partner A (Prince)]} Debugged initialisation algorithm which previously lead to force explosions at step 0. Fixed directory structure for cleanly saving frames locally.
+    \item \textbf{[Partner B (Priyanshu)]} Set up internal force verification mapping validating zero-sum Newton's 3rd Law.
+\end{itemize}
+
+\section*{Week 9: }
+\textbf{Interval:} Feb 9, 2026 -- Feb 15, 2026
+
+\begin{itemize}[noitemsep]
+    \item \textbf{[Partner B (Priyanshu)]} Implemented constant speed functionality modeling distinct motilities.
+    \item \textbf{[Partner A (Prince)]} Overhauled temporal dynamics purely to velocity verlet integration. Added scaling plots (RMS on log scale) capable of calculating actual trajectory distances over running averages, introducing tunable regime boundaries.
+    \item \textbf{[Joint Effort]} Comprehensive data generation utilizing isolated Center of Mass (COM) coordinates across varying parameters ($N \in \{100, 200\}$).
+\end{itemize}
+
+\section*{Week 10: }
+\textbf{Interval:} Feb 16, 2026 -- Feb 22, 2026
+
+\begin{itemize}[noitemsep]
+    \item Running large scale simulations, accessing the Baadal HPC cluster from IIT Delhi, and managing progress between internal university examinations.
+\end{itemize}
+
+\section*{Week 11: }
+\textbf{Interval:} Feb 23, 2026 -- Mar 1, 2026
+
+\begin{itemize}[noitemsep]
+    \item Running large scale simulations, accessing the Baadal HPC cluster from IIT Delhi, and managing progress between internal university examinations.
+\end{itemize}
+
+\section*{Week 12: }
+\textbf{Interval:} Mar 2, 2026 -- Mar 8, 2026
+
+\begin{itemize}[noitemsep]
+    \item Running large scale simulations, accessing the Baadal HPC cluster from IIT Delhi, and managing progress between internal university examinations.
+\end{itemize}
+
+\section*{Week 13: }
+\textbf{Interval:} Mar 9, 2026 -- Mar 15, 2026
+
+\begin{itemize}[noitemsep]
+    \item \textbf{[Partner B (Priyanshu)]} Exploratory generation of preliminary velocity correlation datasets tracking angular deviations.
+\end{itemize}
+
+\section*{Week 14: }
+\textbf{Interval:} Mar 16, 2026 -- Mar 22, 2026
+
+\begin{itemize}[noitemsep]
+    \item \textbf{[Partner A (Prince)]} Observed transition edge cases resulting from shrinking boundaries during real-time plotting. Discovered and documented logic gaps where swimmers occasionally cross and ignore central confinement walls.
+\end{itemize}
+
+\section*{Week 15: }
+\textbf{Interval:} Mar 23, 2026 -- Mar 29, 2026
+
+\begin{itemize}[noitemsep]
+    \item \textbf{[Partner B (Priyanshu)]} Algorithm fix: Extensively corrected velocity correlation scripts and extraction logic.
+    \item \textbf{[Partner A (Prince)]} Finalized proper trajectory graphs and simulations to showcase accurate algorithmic comparisons prior to deadline.
+\end{itemize}
+
+\section*{Week 16: }
+\textbf{Interval:} Mar 30, 2026 -- Apr 5, 2026
+
+\begin{itemize}[noitemsep]
+    \item \textbf{[Partner B (Priyanshu)]} Execution of comprehensive simulations computing transitions across different critical radii confinements ($r=75$, $r=100$), correcting underlying spatial drift mechanisms dynamically.
+\end{itemize}
+
+\section*{Week 17: }
+\textbf{Interval:} Apr 6, 2026 -- Apr 12, 2026
+
+\begin{itemize}[noitemsep]
+    \item \textbf{[Partner A (Prince)]} Architecture Upgrade: Overhauled engine directory architecture mapping \texttt{src}, \texttt{headers}, \texttt{scripts}, and dynamically generated \texttt{results}. Built dynamic resume functionality enabling seamless continuation of any pre-compiled simulation via command-line arguments. Deployed the \textbf{Andersen Thermostat} framework to rigorously sustain NVT ensemble equilibrium over arbitrary lengths.
+\end{itemize}
+
+\end{document}
